@@ -2,14 +2,21 @@ package com.learning.basics.models;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "Lead_Info")
+@Table(name = "Attendance_Data")
 public class AttendanceData {
+
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    private Integer id;
+
+    @Column(name="hours")
     private double hours;
+
+    @Column(name="lead_id")
     private int leadId;
 
 }

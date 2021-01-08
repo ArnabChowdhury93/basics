@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
 public class AppController {
 
     public static final String LEAD_ID = "lead_id";
@@ -25,6 +25,21 @@ public class AppController {
 
     @Autowired
     private AttendanceDataRepository attendanceDataRepository;
+
+    @GetMapping("/")
+    public String dummyGet(){
+        return ("<h1>Hello Spring</h1>");
+    }
+
+    @GetMapping("/admin")
+    public String adminGet(){
+        return ("<h1>Hello Admin</h1>");
+    }
+
+    @GetMapping("/user")
+    public String userGet(){
+        return ("<h1>Hello User</h1>");
+    }
 
     /**
      * This controller method is used to fetch the Lead Info details from the stored Data

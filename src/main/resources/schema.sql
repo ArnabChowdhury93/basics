@@ -10,3 +10,10 @@ CREATE TABLE if not exists Lead_Info(
     communication VARCHAR(255) DEFAULT NULL,
     UNIQUE(mobile,email)
 );
+
+CREATE TABLE if not exists Attendance_Data(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    hours VARCHAR(255),
+    lead_id INT
+);
+
