@@ -1,18 +1,25 @@
 package com.learning.basics.controller;
 
-import com.learning.basics.models.LeadInfo;
-import com.learning.basics.models.ResponseObjectStatus;
+import com.learning.basics.models.*;
 import com.learning.basics.database.AttendanceDataRepository;
 import com.learning.basics.database.LeadInfoRepository;
-import com.learning.basics.models.AttendanceData;
-import com.learning.basics.models.Status;
+import com.learning.basics.service.MyUserDetailsService;
+import com.learning.basics.util.JwtUtility;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-//@RequestMapping("/api")
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController("/api")
 public class AppController {
 
     public static final String LEAD_ID = "lead_id";
@@ -25,6 +32,19 @@ public class AppController {
 
     @Autowired
     private AttendanceDataRepository attendanceDataRepository;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private MyUserDetailsService myUserDetailsService;
+
+    @Autowired
+    private JwtUtility jwtUtility;
+
+
+
+
 
     @GetMapping("/")
     public String dummyGet(){
@@ -39,6 +59,48 @@ public class AppController {
     @GetMapping("/user")
     public String userGet(){
         return ("<h1>Hello User</h1>");
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> createAuthToken(@RequestBody AuthenticationRequest authRequest) throws Exception {
+        try{
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authRequest.getUsername(),authRequest.getPassword()));
+        }
+        catch(BadCredentialsException ex){
+            throw new Exception("Wrong UserName and Password info : " + ex);
+        }
+        final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getUsername());
+        String jwt = jwtUtility.generateToken(userDetails);
+        String refreshJwt = jwtUtility.generateRefreshToken(userDetails);
+
+        return new ResponseEntity<>(new AuthenticationResponse(jwt, refreshJwt), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
+    public ResponseEntity<?> refreshtoken(HttpServletRequest request) throws Exception {
+        final String authorizationHeader = request.getHeader("Authorization");
+
+        String username = null;
+        String jwt = null;
+        String newJwt = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            jwt = authorizationHeader.substring(7);
+            username = jwtUtility.extractUsername(jwt);
+        }
+        if (null != username){
+            newJwt = jwtUtility.generateToken(myUserDetailsService.loadUserByUsername(username));
+        }
+        return ResponseEntity.ok(new AuthenticationResponse(newJwt, null));
+    }
+
+    public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {
+        Map<String, Object> expectedMap = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : claims.entrySet()) {
+            expectedMap.put(entry.getKey(), entry.getValue());
+        }
+        return expectedMap;
     }
 
     /**

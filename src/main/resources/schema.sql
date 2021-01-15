@@ -17,3 +17,19 @@ CREATE TABLE if not exists Attendance_Data(
     lead_id INT
 );
 
+CREATE TABLE if not exists MY_USER(
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    USERNAME VARCHAR(255) NOT NULL,
+    PASSWORD VARCHAR(255) NOT NULL,
+    ROLES VARCHAR(255) NOT NULL,
+    ENABLED BOOLEAN NOT NULL
+);
+
+
+--create table if not exists my_authorities (
+--    username varchar_ignorecase(50) not null,
+--    authority varchar_ignorecase(50) not null,
+--    constraint fk_my_authorities_users foreign key(username) references my_users(username)
+--);
+--create unique index ix_my_auth_username on my_authorities (username,authority);
+
